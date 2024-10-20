@@ -1,4 +1,5 @@
 #include "tests.h"
+#include<cmath>
 
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
@@ -7,7 +8,16 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+   int n=0;
+    for(int i=0;1;i++)
+    {
+       if(str[i]=='\0')
+        {
+         n=i;
+         break;
+         }
+    }
+    return n;
 }
 
 
@@ -19,6 +29,24 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    bool tree =false;
+    for(int i=0;1;i++)
+    {
+        if(str_1[i]=='\0')
+        {
+            for(int n=0;1;n++)
+            {
+                str_1[i+n]=str_2[n];
+                if(str_2[n]=='\0')
+                {
+                    tree=true;
+                    break;
+                }
+            }
+        }
+    if(tree==true)
+    break;
+    }
 }
 
 
@@ -31,7 +59,27 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+   char *ans=0;
+    bool tree=false;
+    for(int i=0;s[i]!='\0';i++)
+    {
+        if(s[i]==p[0])
+        {
+            
+            for(int n=0;s[i+n]==p[n]||p[n]=='\0';n++)
+            {
+                if(p[n]=='\0')
+                {
+                   ans=&s[i];
+                    tree=true; 
+                    break;
+                }
+            }
+        }
+        if(tree==true)
+        break;
+    }
+    return ans;
 }
 
 
@@ -96,6 +144,16 @@ void rgb2gray(float *in, float *out, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    long long sum=h*w;
+    for(long long i=0;i<sum;i++)
+    {
+        float R=in[3*i];
+        float G=in[3*i+1];
+        float B=in[3*i+2];
+        out[i]=0.1140 * B  + 0.5870 * G + 0.2989 * R;
+    }
+    
+
     // ...
 }
 
@@ -198,6 +256,30 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
 
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
+    //Dx = x2 - x1, Dy = y2 - y1, dx = x - x1, dy = y - y1，
+    //P1(x1, y2) P2(x2, y2) P3(x1, y1) P4(x2, y1)
+    // Q = P1 * (1 - dx)(1 - dy) + P2 * dx(1 - dy) + P3 * (1 - dx)dy + P4 * dxdy
+    for(int y=0;y<new_h;y++)
+    {
+        for(int x=0;x<new_w;x++)
+        {
+            float x0=x/scale;
+            float y0=y/scale;
+            int x1 = static_cast<int>(x0);
+            int y1 = static_cast<int>(y0);
+            int x2 = (x1+1>w)?x1:x1+1;
+            int y2 = (y1+1>h)?y1:y1+1;
+            int dx = x0-x1;
+            int dy = y0-y1;
+            for(int i=0;i<c;i++)
+            {
+                out[(y*new_w+x)*c+i]=in[(y2*w+x1)*c+i]*(1 - dx)*(1 - dy) + in[(y2*w+x2)*c+i]*dx*(1 - dy) + in[(y1*w+x1)*c+i]*(1 - dx)*dy +in[(y1*w+x2)*c+i]*dx*dy;
+            }
+
+        }
+ 
+
+    }
 
 }
 
@@ -221,4 +303,28 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    int NumPixel[256]={0};
+    for(long long i=0;i<h*w;i++)
+    {
+        int k=static_cast<int>(in[i]);
+        NumPixel[k]++;
+    }
+    float ProbPixel[256]={0};
+    for(int i=0;i<256;i++)
+    ProbPixel[i]=NumPixel[i]/static_cast<float>(h*w);
+    float CumPixel[256]={0};
+    for(int i=0;i<256;i++)
+    {
+        for(int n=0;n<=i;n++)
+        CumPixel[i] +=ProbPixel[n];
+    }
+    for(int i=0;i<256;i++)
+    {
+        CumPixel[i] =std::round(255* CumPixel[i]);
+    }
+     for(long long i=0;i<h*w;i++)
+    {
+        int k=static_cast<int>(in[i]);
+        in[i]=CumPixel[k];
+    }
 }
